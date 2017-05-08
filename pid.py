@@ -14,7 +14,7 @@ targetSpeed = 450
 #Reset motors
 mR.reset()
 mL.reset()
-#Init PID parameters
+#Init PID parameters --> tuned with Ziegler–Nichols method
 errorPrior = 0.0
 integral = 0.0
 kP = 5.4
@@ -22,8 +22,12 @@ kI = 21.6
 kD = 0.33
 iterTime = 0.1
 bias = 0
+#Some statistics
+sumError = 0
+#main loop
 while not btn.any():
         error = mL.position - mR.position
+        sumError += error
         print("Error is: %d", (error))
         integral = integral + (error * iterTime)
         derivative = (error - errorPrior) / iterTime
@@ -38,6 +42,9 @@ while not btn.any():
         mL.run_forever(speed_sp=targetSpeed)
         print("L/Rencoders: %d | %d --> difference in encoded steps is %d" % (mL.position, mR.position, error))
         sleep(iterTime)
-
+#stop motors
 mR.stop(stop_action='brake')
 mL.stop(stop_action='brake')
+#output statistics
+print("Finished running the programm.")
+print("The sum of all errors is: %d" % (sumError))
