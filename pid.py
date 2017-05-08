@@ -8,15 +8,18 @@ btn = ev3.Button() # will use any button to stop script
 #Init motors
 mR = ev3.LargeMotor('outA')
 mL = ev3.LargeMotor('outD')
+maxR = mR.max_speed
+maxL = mL.max_speed
+targetSpeed = 450
 #Reset motors
 mR.reset()
 mL.reset()
 #Init PID parameters
-errorPrior = 0
-integral = 0
-kP = 2
-kI = 20
-kD = 1
+errorPrior = 0.0
+integral = 0.0
+kP = 5.4
+kI = 21.6
+kD = 0.33
 iterTime = 0.1
 bias = 0
 while not btn.any():
@@ -26,9 +29,14 @@ while not btn.any():
         derivative = (error - errorPrior) / iterTime
         output = kP*error + kI*integral + kD*derivative + bias
         print("Output is: %d", (output))
-        mR.run_forever(speed_sp=450+output)
-        mL.run_forever(speed_sp=450)
-        print("L/Rencoders: %d | %d" % (mL.position, mR.position))
+        actualSpeed = targetSpeed + output
+        if(actualSpeed < 0):
+            actualSpeed = 0
+        if(actualSpeed > maxR):
+            actualSpeed = maxR
+        mR.run_forever(speed_sp=actualSpeed)
+        mL.run_forever(speed_sp=targetSpeed)
+        print("L/Rencoders: %d | %d --> difference in encoded steps is %d" % (mL.position, mR.position, error))
         sleep(iterTime)
 
 mR.stop(stop_action='brake')
