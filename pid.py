@@ -22,12 +22,20 @@ kI = 21.6
 kD = 0.33
 iterTime = 0.1
 bias = 0
+masterKoeficient = 1
+#masterKoeficient = 0.999
 #Some statistics
 sumError = 0
+sumPositiveError = 0
+sumNegativeError = 0
 #main loop
 while not btn.any():
-        error = mL.position - mR.position
+        error = (mL.position*masterKoeficient) - mR.position
         sumError += error
+        if(error > 0):
+            sumPositiveError += error
+        else:
+            sumNegativeError += error * -1
         print("Error is: %d", (error))
         integral = integral + (error * iterTime)
         derivative = (error - errorPrior) / iterTime
@@ -48,3 +56,5 @@ mL.stop(stop_action='brake')
 #output statistics
 print("Finished running the programm.")
 print("The sum of all errors is: %d" % (sumError))
+print("The sum of positive errors is: %d" % (sumPositiveError))
+print("The sum of negative errors is: %d" % (sumNegativeError))
