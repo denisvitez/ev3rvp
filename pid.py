@@ -97,13 +97,21 @@ def rotate(target, rotationSpeed):
         angle = gy.value()
         if(angle == target):
             return
-        if(angle < target):
-            mR.run_forever(speed_sp=rotationSpeed)
-            mL.run_forever(speed_sp=-rotationSpeed)
-        elif(angle > target):
-            mR.run_forever(speed_sp=-rotationSpeed)
-            mL.run_forever(speed_sp=rotationSpeed)
-        sleep(0.05)
+        diff = angle - target
+        print("Angle diff is: "+str(diff))
+        targetSpeed = diff * 10
+        if diff > 0:
+            targetSpeed += 20
+        if diff < 0:
+            targetSpeed -= 20
+        if(targetSpeed > 0 and targetSpeed > rotationSpeed):
+            targetSpeed = rotationSpeed
+        if(targetSpeed < 0 and targetSpeed < -rotationSpeed):
+            targetSpeed = -rotationSpeed
+        print("Target speed is: "+str(targetSpeed))
+        mR.run_forever(speed_sp=-targetSpeed)
+        mL.run_forever(speed_sp=+targetSpeed)
+        sleep(0.1)
 
 def readColor():
     try:
@@ -128,6 +136,13 @@ stop()
 rotate(180, 200)
 stop()
 goStraight(10, 2)
+rotate(0, 200)
+stop()
+goStraight(10, 3)
+stop()
+rotate(180, 200)
+stop()
+goStraight(10, 3)
 rotate(0, 200)
 stop()
 #output statistics
