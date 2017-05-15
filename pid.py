@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 import ev3dev.ev3 as ev3
 from time import sleep
+import paho.mqtt.client as mqtt
 
 #Go in a straight line
 #Left motor will be MASTER --> mL
 btn = ev3.Button() # will use any button to stop script
+client = mqtt.Client()
+client.connect("vitez.si", 1883, 60)
 #Init motors
 mR = ev3.LargeMotor('outA')
 mL = ev3.LargeMotor('outD')
@@ -17,10 +20,10 @@ mL.reset()
 #Init PID parameters --> tuned with Ziegler–Nichols method
 errorPrior = 0.0
 integral = 0.0
-kP = 5.4
-kI = 21.6
-kD = 0.33
-iterTime = 0.1
+kP = 6
+kI = 30
+kD = 0.3
+iterTime = 0.05
 bias = 0
 masterKoeficient = 1
 #masterKoeficient = 0.999
@@ -42,6 +45,7 @@ while not btn.any():
         output = kP*error + kI*integral + kD*derivative + bias
         print("Output is: %d", (output))
         actualSpeed = targetSpeed + output
+        #client.publish("ev3/speed", actualSpeed);
         if(actualSpeed < 0):
             actualSpeed = 0
         if(actualSpeed > maxR):
