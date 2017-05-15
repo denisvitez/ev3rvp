@@ -3,6 +3,7 @@ import ev3dev.ev3 as ev3
 from time import sleep
 import paho.mqtt.client as mqtt
 from threading import Thread
+from multiprocessing import Process
 
 #Go in a straight line
 #Left motor will be MASTER --> mL
@@ -15,13 +16,10 @@ mL = ev3.LargeMotor('outD')
 maxR = mR.max_speed
 maxL = mL.max_speed
 targetSpeed = 450
-#Reset motors
-mR.reset()
-mL.reset()
 #Init light sensor
 cl = ev3.ColorSensor()
 cl.mode='COL-REFLECT'
-black_value = 5
+blackValue = 10
 #Init gyro
 gy = ev3.GyroSensor()
 #Gyro can be reset with changing between modes :) (WTF!)
@@ -41,12 +39,30 @@ masterKoeficient = 1
 sumError = 0
 sumPositiveError = 0
 sumNegativeError = 0
-
-stop_forward_thread = False
-def goStraight():
+def stop():
+    #stop motors
+    mR.stop(stop_action='brake')
+    mL.stop(stop_action='brake')
+def goStraight(blackWait, skipLines):
     #main loop
+    #Reset motors
+    waitStarted = False
+    iterationsWaited = 0
+    mR.reset()
+    mL.reset()
     try:
-        while not btn.any() and not stop_forward_thread:
+        while not btn.any():
+            if(cl.value() < blackValue and not waitStarted):
+                waitStarted = True
+            if waitStarted:
+                iterationsWaited += 1
+                if iterationsWaited > blackWait:
+                    if skipLines <= 0:
+                        return
+                    else:
+                        skipLines -= 1
+                        iterationsWaited = 0
+                        waitStarted = False
             global sumError
             global sumPositiveError
             global sumNegativeError
@@ -76,18 +92,44 @@ def goStraight():
     except KeyboardInterrupt:
         pass
 
-def readColor():
+def rotate(target, rotationSpeed):
     while True:
-        print("IR loop")
-        print(cl.value())
-        sleep(0.1)
-forward = Thread(target = goStraight(), args = ())
-forward.start()
-readColor = Thread(target= readColor)
-readColor.start()
-#stop motors
-mR.stop(stop_action='brake')
-mL.stop(stop_action='brake')
+        angle = gy.value()
+        if(angle == target):
+            return
+        if(angle < target):
+            mR.run_forever(speed_sp=rotationSpeed)
+            mL.run_forever(speed_sp=-rotationSpeed)
+        elif(angle > target):
+            mR.run_forever(speed_sp=-rotationSpeed)
+            mL.run_forever(speed_sp=rotationSpeed)
+        sleep(0.05)
+
+def readColor():
+    try:
+        while True:
+            print("IR loop")
+            print(cl.value())
+            sleep(0.1)
+    except KeyboardInterrupt:
+        pass
+
+
+#Main code
+goStraight(10, 1)
+stop()
+rotate(180, 200)
+stop()
+goStraight(10, 1)
+rotate(0, 200)
+stop()
+goStraight(10, 2)
+stop()
+rotate(180, 200)
+stop()
+goStraight(10, 2)
+rotate(0, 200)
+stop()
 #output statistics
 print("Finished running the programm.")
 print("The sum of all errors is: %d" % (sumError))
