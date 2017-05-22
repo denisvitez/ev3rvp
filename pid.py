@@ -5,28 +5,27 @@ import paho.mqtt.client as mqtt
 from threading import Thread
 from multiprocessing import Process
 
-#Go in a straight line
-#Left motor will be MASTER --> mL
+# Go in a straight line
+# Left motor will be MASTER --> mL
 btn = ev3.Button() # will use any button to stop script
 client = mqtt.Client()
 client.connect("vitez.si", 1883, 60)
-#Init motors
+# Init motors
 mR = ev3.LargeMotor('outA')
 mL = ev3.LargeMotor('outD')
 maxR = mR.max_speed
 maxL = mL.max_speed
 targetSpeed = 450
-#Init light sensor
+# Init light sensor
 cl = ev3.ColorSensor()
 cl.mode='COL-REFLECT'
 blackValue = 15
 #Init gyro
-gy = ev3.GyroSensor()
-#Gyro can be reset with changing between modes :) (WTF!)
+# Gyro can be reset with changing between modes :) (WTF!)
 gy.mode = 'GYRO-ANG'
 gy.mode = 'GYRO-RATE'
 gy.mode='GYRO-ANG'
-#Init PID parameters --> tuned with Ziegler–Nichols method
+# Init PID parameters --> tuned with Ziegler–Nichols method
 
 kP = 3.6
 kI = 18
@@ -39,13 +38,17 @@ masterKoeficient = 0.99
 sumError = 0
 sumPositiveError = 0
 sumNegativeError = 0
+
+
 def stop():
-    #stop motors
+    # stop motors
     mR.stop(stop_action='brake')
     mL.stop(stop_action='brake')
+
+
 def goStraight(blackWait, skipLines):
-    #main loop
-    #Reset motors
+    # main loop
+    # Reset motors
     waitStarted = False
     iterationsWaited = 0
     mR.reset()
@@ -68,7 +71,7 @@ def goStraight(blackWait, skipLines):
             global sumNegativeError
             errorPrior = 0.0
             integral = 0.0
-            error = (mL.position*masterKoeficient) - mR.position
+            error = (mL.position * masterKoeficient) - mR.position
             sumError += error
             if(error > 0):
                 sumPositiveError += error
@@ -92,6 +95,7 @@ def goStraight(blackWait, skipLines):
     except KeyboardInterrupt:
         pass
 
+
 def rotate(target, rotationSpeed):
     while True:
         angle = gy.value()
@@ -112,6 +116,7 @@ def rotate(target, rotationSpeed):
         mR.run_forever(speed_sp=-targetSpeed)
         mL.run_forever(speed_sp=+targetSpeed)
         sleep(0.1)
+
 
 def readColor():
     try:
@@ -145,7 +150,7 @@ if __name__ == "__main__":
     goStraight(10, 3)
     rotate(0, 100)
     stop()
-    #output statistics
+    # output statistics
     print("Finished running the programm.")
     print("The sum of all errors is: %d" % (sumError))
     print("The sum of positive errors is: %d" % (sumPositiveError))
