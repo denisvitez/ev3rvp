@@ -1,5 +1,11 @@
 import paho.mqtt.client as mqtt
+import numpy as np
+import matplotlib.pyplot as plt
 
+plt.ion()
+x_data = []
+y_data = []
+y = 0
 
 def on_connect(client, userdata, rc):
     client.subscribe("ev3/speed")
@@ -8,7 +14,16 @@ def on_connect(client, userdata, rc):
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
-    print("Topic: ", msg.topic+"\nMessage: "+str(msg.payload))
+    # print(msg.payload)
+    global x
+    global y
+    global x_data
+    y += 1
+    y_data.append(y)
+    x_data.append(msg.payload)
+    plt.plot(y_data, x_data)
+    plt.show()
+    plt.pause(0.0001)
 
 
 if __name__ == "__main__":
