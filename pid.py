@@ -21,6 +21,7 @@ cl = ev3.ColorSensor()
 cl.mode='COL-REFLECT'
 blackValue = 15
 #Init gyro
+gy = ev3.GyroSensor()
 # Gyro can be reset with changing between modes :) (WTF!)
 gy.mode = 'GYRO-ANG'
 gy.mode = 'GYRO-RATE'
