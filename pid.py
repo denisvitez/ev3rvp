@@ -50,6 +50,7 @@ def stop():
 def goStraight(blackWait, skipLines):
     # main loop
     # Reset motors
+    slowStart = 200
     waitStarted = False
     iterationsWaited = 0
     mR.reset()
@@ -83,15 +84,17 @@ def goStraight(blackWait, skipLines):
             derivative = (error - errorPrior) / iterTime
             output = kP*error + kI*integral + kD*derivative + bias
             print("Output is: %d", (output))
-            actualSpeed = targetSpeed + output
+            actualSpeed = (targetSpeed - slowStart) + output
             if(actualSpeed < 0):
                 actualSpeed = 0
             if(actualSpeed > maxR):
                 actualSpeed = maxR
             mR.run_forever(speed_sp=actualSpeed)
-            mL.run_forever(speed_sp=targetSpeed)
+            mL.run_forever(speed_sp=(targetSpeed - slowStart))
             print("L/Rencoders: %d | %d --> difference in encoded steps is %d" % (mL.position, mR.position, error))
             client.publish("ev3/speed", actualSpeed)
+            if slowStart > 0:
+                slowStart -= 10
             sleep(iterTime)
     except KeyboardInterrupt:
         pass
@@ -130,6 +133,7 @@ def readColor():
 
 
 if __name__ == "__main__":
+    ev3.Sound.speak('Roll out!').wait()
     goStraight(10, 1)
     stop()
     rotate(180, 100)
@@ -156,3 +160,4 @@ if __name__ == "__main__":
     print("The sum of all errors is: %d" % (sumError))
     print("The sum of positive errors is: %d" % (sumPositiveError))
     print("The sum of negative errors is: %d" % (sumNegativeError))
+    ev3.Sound.speak('I have made it mother.').wait()
