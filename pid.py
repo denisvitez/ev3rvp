@@ -33,7 +33,7 @@ kI = 18
 kD = 0.18
 iterTime = 0.05
 bias = 0
-masterKoeficient = 0.99
+masterKoeficient = 1
 #masterKoeficient = 0.999
 #Some statistics
 sumError = 0
@@ -146,7 +146,7 @@ if __name__ == "__main__":
     rotate(180, 100)
     stop()
     goStraight(10, 2)
-    rotate(0, 100)
+    rotate(3, 100)
     stop()
     goStraight(10, 3)
     stop()
