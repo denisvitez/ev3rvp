@@ -19,7 +19,7 @@ targetSpeed = 450
 # Init light sensor
 cl = ev3.ColorSensor()
 cl.mode='COL-REFLECT'
-blackValue = 15
+blackValue = 10
 #Init gyro
 gy = ev3.GyroSensor()
 # Gyro can be reset with changing between modes :) (WTF!)
@@ -33,7 +33,7 @@ kI = 18
 kD = 0.18
 iterTime = 0.05
 bias = 0
-masterKoeficient = 1
+masterKoeficient = 0.995
 #masterKoeficient = 0.999
 #Some statistics
 sumError = 0
@@ -139,18 +139,18 @@ if __name__ == "__main__":
     rotate(180, 100)
     stop()
     goStraight(10, 1)
-    rotate(0, 100)
+    rotate(4, 100)
     stop()
     goStraight(10, 2)
     stop()
-    rotate(180, 100)
+    rotate(184, 100)
     stop()
     goStraight(10, 2)
-    rotate(3, 100)
+    rotate(7, 100)
     stop()
     goStraight(10, 3)
     stop()
-    rotate(180, 100)
+    rotate(195, 100)
     stop()
     goStraight(10, 3)
     rotate(0, 100)
